@@ -41,7 +41,7 @@ supabase secrets set \
 
 ```bash
 cd path/to/your-saas
-git clone https://github.com/<your-username>/saas-admin-dashboard-template admin-dashboard
+git clone https://github.com/iwellnet/saas-admin-dashboard-template admin-dashboard
 cd admin-dashboard
 rm -rf .git    # отвязываем от template, теперь это часть SaaS репо
 cp .env.example .env.local
