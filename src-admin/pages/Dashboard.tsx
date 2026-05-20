@@ -1,9 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { Building2, DollarSign, Clock, XCircle, LogOut, Shield } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Building2, DollarSign, Clock, XCircle } from "lucide-react";
 import { MetricCard } from "@/components/MetricCard";
 import { adminSupabase } from "@/lib/supabase";
-import { useAuth } from "@/lib/auth";
 import { dashboardConfig } from "@/config";
 
 type Metrics = {
@@ -25,7 +23,6 @@ async function fetchMetrics(): Promise<Metrics | null> {
 }
 
 export function Dashboard() {
-  const { profile, signOut } = useAuth();
   const { data: metrics, isLoading } = useQuery({
     queryKey: ["saas-metrics"],
     queryFn: fetchMetrics,
@@ -44,67 +41,46 @@ export function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      <header className="bg-card border-b">
-        <div className="container py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Shield className="w-5 h-5 text-primary" />
-            <h1 className="text-lg font-semibold">{dashboardConfig.saasName} Admin</h1>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="text-sm text-right">
-              <div className="font-medium">{profile?.full_name || profile?.email}</div>
-              <div className="text-xs text-muted-foreground capitalize">{profile?.role}</div>
-            </div>
-            <Button variant="outline" size="sm" onClick={signOut}>
-              <LogOut className="w-4 h-4" />
-              Выход
-            </Button>
-          </div>
-        </div>
-      </header>
+    <div className="p-8 space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold">Обзор</h2>
+        <p className="text-muted-foreground">Ключевые метрики SaaS-бизнеса</p>
+      </div>
 
-      <main className="container py-8 space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold">Обзор</h2>
-          <p className="text-muted-foreground">Ключевые метрики SaaS-бизнеса</p>
-        </div>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <MetricCard
+          title="MRR"
+          value={isLoading ? "…" : fmtMoney(metrics?.mrr_usd)}
+          hint="Месячная регулярная выручка"
+          icon={<DollarSign className="w-4 h-4" />}
+        />
+        <MetricCard
+          title="Активные платящие"
+          value={isLoading ? "…" : fmt(metrics?.active_paying)}
+          hint="Basic + Pro подписки"
+          icon={<Building2 className="w-4 h-4" />}
+        />
+        <MetricCard
+          title="Trial"
+          value={isLoading ? "…" : fmt(metrics?.active_trials)}
+          hint="Триал ещё не истёк"
+          icon={<Clock className="w-4 h-4" />}
+        />
+        <MetricCard
+          title="Истёк"
+          value={isLoading ? "…" : fmt(metrics?.expired)}
+          hint={`Заблокировано вручную: ${fmt(metrics?.manually_blocked)}`}
+          icon={<XCircle className="w-4 h-4" />}
+        />
+      </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <MetricCard
-            title="MRR"
-            value={isLoading ? "…" : fmtMoney(metrics?.mrr_usd)}
-            hint="Месячная регулярная выручка"
-            icon={<DollarSign className="w-4 h-4" />}
-          />
-          <MetricCard
-            title="Активные платящие"
-            value={isLoading ? "…" : fmt(metrics?.active_paying)}
-            hint="Basic + Pro подписки"
-            icon={<Building2 className="w-4 h-4" />}
-          />
-          <MetricCard
-            title="Trial"
-            value={isLoading ? "…" : fmt(metrics?.active_trials)}
-            hint="Триал ещё не истёк"
-            icon={<Clock className="w-4 h-4" />}
-          />
-          <MetricCard
-            title="Истёк"
-            value={isLoading ? "…" : fmt(metrics?.expired)}
-            hint={`Заблокировано вручную: ${fmt(metrics?.manually_blocked)}`}
-            icon={<XCircle className="w-4 h-4" />}
-          />
-        </div>
-
-        <div className="rounded-lg border bg-card p-8 text-center text-muted-foreground">
-          <p>Sprint 2 добавит: список организаций, детальную страницу, действия super-admin.</p>
-          <p className="text-xs mt-2">
-            Метрики берутся из <code>v_saas_metrics</code> в admin Supabase. Если пусто — кэш{" "}
-            <code>cached_organizations</code> ещё не заполнен Paddle webhook'ом.
-          </p>
-        </div>
-      </main>
+      <div className="rounded-lg border bg-card p-8 text-center text-muted-foreground">
+        <p>В следующих спринтах добавятся: детальная страница организации, действия super-admin, история платежей, audit log.</p>
+        <p className="text-xs mt-2">
+          Метрики берутся из <code>v_saas_metrics</code> в admin Supabase. Если пусто — кэш{" "}
+          <code>cached_organizations</code> ещё не заполнен Paddle webhook'ом.
+        </p>
+      </div>
     </div>
   );
 }
