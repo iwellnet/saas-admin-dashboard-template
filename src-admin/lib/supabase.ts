@@ -10,7 +10,11 @@ export const adminSupabase = createClient(
     auth: {
       persistSession: true,
       autoRefreshToken: true,
-      storageKey: "admin-dashboard-auth",
+      storageKey: "admin-auth-v3",
+      detectSessionInUrl: false,
+      // Фикс зависания signInWithPassword на 12+ сек из-за navigator.locks
+      // в supabase-js v2 при HMR / dev-режиме
+      lock: <R>(_name: string, _acquireTimeout: number, fn: () => Promise<R>): Promise<R> => fn(),
     },
   }
 );
