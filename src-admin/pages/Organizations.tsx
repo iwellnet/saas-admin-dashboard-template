@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,7 @@ const planVariant: Record<string, "default" | "secondary" | "destructive" | "war
 };
 
 export function Organizations() {
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [planFilter, setPlanFilter] = useState<string>("");
   const [page, setPage] = useState(0);
@@ -134,7 +136,7 @@ export function Organizations() {
               </TableRow>
             ) : (
               data.items.map((org) => (
-                <TableRow key={org.id} className="cursor-pointer">
+                <TableRow key={org.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/orgs/${org.id}`)}>
                   <TableCell className="font-medium">{org.name}</TableCell>
                   <TableCell className="text-muted-foreground text-xs">{org.slug}</TableCell>
                   <TableCell>

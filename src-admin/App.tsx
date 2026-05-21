@@ -3,6 +3,7 @@ import { useAuth } from "./lib/auth";
 import { Login } from "./pages/Login";
 import { Dashboard } from "./pages/Dashboard";
 import { Organizations } from "./pages/Organizations";
+import { OrganizationDetail } from "./pages/OrganizationDetail";
 import { AdminLayout } from "./components/AdminLayout";
 
 function ProtectedLayout() {
@@ -34,6 +35,7 @@ export default function App() {
       <Route element={<ProtectedLayout />}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/orgs" element={<Organizations />} />
+        <Route path="/orgs/:id" element={<OrganizationDetail />} />
         <Route path="/payments" element={<Placeholder title="Платежи" />} />
         <Route path="/audit" element={<Placeholder title="Audit log" />} />
         <Route path="/admins" element={<Placeholder title="Super-admins" />} />
