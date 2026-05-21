@@ -46,8 +46,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let mounted = true;
 
+    // Страховочный таймаут: если Supabase не отвечает за 8 сек — снимаем loader
+    const initTimer = setTimeout(() => {
+      if (mounted) {
+        console.warn("[auth] init timeout — forcing loading=false");
+        setLoading(false);
+      }
+    }, 8000);
+
     adminSupabase.auth.getSession().then(async ({ data: { session: s } }) => {
       if (!mounted) return;
+      clearTimeout(initTimer);
       setSession(s);
       if (s?.user) {
         const p = await loadProfile(s.user.id);
@@ -56,16 +65,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!p) await adminSupabase.auth.signOut();
       }
       setLoading(false);
+    }).catch((err) => {
+      console.error("[auth] getSession error:", err);
+      clearTimeout(initTimer);
+      if (mounted) setLoading(false);
     });
 
-    const { data: listener } = adminSupabase.auth.onAuthStateChange(async (_event, s) => {
+    const { data: listener } = adminSupabase.auth.onAuthStateChange(async (event, s) => {
       if (!mounted) return;
       setSession(s);
       if (s?.user) {
         const p = await loadProfile(s.user.id);
         if (!mounted) return;
         setProfile(p);
-        if (!p) await adminSupabase.auth.signOut();
+        // Разлогиниваем только при явной смене сессии, НЕ при SIGNED_IN
+        if (!p && event !== "SIGNED_IN") await adminSupabase.auth.signOut();
       } else {
         setProfile(null);
       }
@@ -73,6 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => {
       mounted = false;
+      clearTimeout(initTimer);
       listener.subscription.unsubscribe();
     };
   }, []);
