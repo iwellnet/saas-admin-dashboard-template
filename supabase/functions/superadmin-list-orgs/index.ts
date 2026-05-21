@@ -58,7 +58,8 @@ Deno.serve(async (req) => {
   if (filters.plan) q = q.eq("plan", filters.plan);
   if (filters.isActive !== undefined) q = q.eq("is_active", filters.isActive);
   if (filters.search) {
-    const s = `%${filters.search}%`;
+    const sanitized = filters.search.replace(/[,().]/g, "");
+    const s = `%${sanitized}%`;
     q = q.or(`name.ilike.${s},slug.ilike.${s}`);
   }
 

@@ -11,6 +11,7 @@
 
 import {
   verifySuperAdmin,
+  requireRole,
   handleOptions,
   corsResponse,
 } from "../_shared/verify-admin.ts";
@@ -31,6 +32,9 @@ Deno.serve(async (req) => {
 
   const verified = await verifySuperAdmin(req);
   if (verified instanceof Response) return verified;
+
+  const roleErr = requireRole(verified, ["owner", "support"]);
+  if (roleErr) return roleErr;
 
   let body: ActionBody;
   try {
@@ -89,6 +93,8 @@ Deno.serve(async (req) => {
       break;
 
     case "change_plan": {
+      const planRoleErr = requireRole(verified, ["owner"]);
+      if (planRoleErr) return planRoleErr;
       const allowed = ["trial", "basic", "pro"];
       if (!allowed.includes(body.plan)) {
         return corsResponse({ error: `Invalid plan: ${body.plan}` }, 400);
