@@ -13,6 +13,8 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src-admin"),
     },
+    // Запрет дублирования React — иначе @radix-ui тянет свою копию
+    dedupe: ["react", "react-dom"],
   },
   build: {
     outDir: "dist",
