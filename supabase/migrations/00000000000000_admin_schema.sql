@@ -163,6 +163,13 @@ SELECT
   sum(CASE plan WHEN 'basic' THEN 29 WHEN 'pro' THEN 79 ELSE 0 END)    AS mrr_usd
 FROM public.cached_organizations;
 
+-- Права для роли authenticated (RLS контролирует, какие строки видны)
+GRANT SELECT ON public.super_admins TO authenticated;
+GRANT INSERT, UPDATE, DELETE ON public.super_admins TO authenticated;
+GRANT SELECT ON public.payments TO authenticated;
+GRANT SELECT ON public.subscriptions TO authenticated;
+GRANT SELECT ON public.superadmin_audit_log TO authenticated;
+GRANT SELECT ON public.cached_organizations TO authenticated;
 GRANT SELECT ON public.v_saas_metrics TO authenticated;
 
 -- ============================================================
